@@ -2,12 +2,13 @@
 ##########               README                            ##########
 #####################################################################
 
-# The analyses was run on the HPC compute cluster at the Donders Institute 
-# in Nijmegen. This script can be run on weaker system as well (tested 
+# The analyses were run on the HPC compute cluster at the Donders Institute 
+# in Nijmegen. This script can be run on weaker systems as well (tested 
 # with 16GB and 2.7 Intel Quad). The memory of the system will be checked
-# in this script and based on that either 5 or 100 imputation are used. 
-# They lead to the same conclusions, but we report results based on 100
-# imputations. Those will take ca. 2 days to fit on a HPC cluster.
+# in this script and based on that either 5 or 100 imputations are used. 
+# 5 and 10 lead to the same conclusions, but we report results based on 100
+# imputations for higher precision of CI. 
+# Those will take ca. 2 days to fit on a HPC cluster.
 
 options(repr.plot.width=30, repr.plot.height=10)
 
@@ -67,7 +68,7 @@ load(here::here("rdata/mb_import_H.Rds"))
 # to be able to inspect models locally I set a lower m that will give same 
 # point estimate but potentially lower accuracy of credible interval. For 
 # the final model the high m will be used which is fitted in the cloud.
-# this happens automatically based on availabel memory (see readme)
+# this happens automatically based on available memory (see readme)
 
 mem <- memuse::Sys.meminfo()$totalram %>% as.numeric()
 m <- ifelse(mem <= 17179869184, 5, 100)
@@ -118,17 +119,20 @@ df_imp <- mice::mice(
 
 
 # The goal is not to find perfect priors for any specific model (as I fit 
-# many different models per time point and per covariate structure).
-# Rather the goal is to find priors that allow for any possible assocation
+# many different models per time point and per predictor structure).
+# Rather, the goal is to find priors that allow for any possible assocation
 # while only being slightly restricting parameter space. Given the amount of
 # data we have, the chosen priors will play barely a role as long as I do not 
-# prevent the model from searching in realistic parameter space. FOr such as 
-# scenario, prior predictive simulations have been performed frequently with 
-# data, e.g. here: https://github.com/HenrikEckermann/microbiota_executive_functioning2021/blob/main/R/sim.R # below we only specify
-# prior for the slope parameters, the SD of the "random effects" and the error 
-# of the model. That means that brms default priors are used for the intercept 
+# prevent the model from searching in realistic parameter space. For this 
+# scenario, prior predictive simulations have been performed frequently with
+# e.g. here: https://github.com/HenrikEckermann/microbiota_executive_functioning2021/blob/main/R/sim.R 
+
+# below we only specify prior for the slope parameters, the SD of the "random effects" 
+# and the error of the model. That means that brms default priors are used for the intercept 
 # (student_t) and correlation between slopes and intercepts (lkj).
 # All these priors are easily "overwhelmed" by data.
+                
+                
 priors <- c(
   prior(normal(0, 0.5), class = "b"),
   prior(exponential(1), class = "sd"),
