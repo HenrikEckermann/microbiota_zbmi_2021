@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data/*
+.DS_Store
+rdata/*
+bmi_paper_2020.Rproj
+fig/*
+out/*
+article/*
+
