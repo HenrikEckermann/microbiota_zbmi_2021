@@ -1,13 +1,8 @@
 library(tidyverse)
-# load helper scrips
+# load helper scripts
 source(here::here("R/ml_helper.R"))
 source(here::here("R/mb_helper.R"))
-
-
-#####################################################################
-##########           import and prepare data               ##########
-#####################################################################
-
+# load data
 load(here::here("rdata/mb_import_H.Rds"))
  
 
