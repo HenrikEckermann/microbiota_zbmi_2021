@@ -234,10 +234,53 @@ df <- full_join(temp1, temp2, by = c("subject", "time")) %>%
 df <- select(df, id = subject , everything())
 
 
+# create df that we use for correlations
+temp3 <- df_scfa_clr %>%   
+  mutate(time = ifelse(startsWith(Sample, "a"), "1", 
+                       ifelse(startsWith(Sample, "b"), "2", 
+                              ifelse(startsWith(Sample, "c"), "3",
+                                     ifelse(startsWith(Sample, "d"), "4",
+                                            ifelse(startsWith(Sample, "e"), "5", NA))))),
+         time = as.integer(time))
+
+
+df_cor <- temp2 %>% mutate(id = as.character(subject)) %>% 
+  full_join(df_ratio, by = c("id", "time")) %>% 
+  full_join(temp3 ,by = c("id", "time")) %>% 
+  select(id, time, bmi, bmi_Tminus, fb_ratio, scfa_clr) %>%
+  pivot_wider(id_cols = id, names_from = time, names_sep = "_", 
+              values_from = c(bmi, bmi_Tminus, fb_ratio, scfa_clr)) %>%
+  rename(zBMI_1m = bmi_Tminus_1,
+         zBMI_3m = bmi_1,
+         zBMI_4m = bmi_2,
+         zBMI_2y = bmi_3,
+         zBMI_6y = bmi_Tminus_4,
+         zBMI_7y = bmi_4,
+         zBMI_10y = bmi_Tminus_5,
+         zBMI_12y = bmi_5,
+         FB_ratio_1m = fb_ratio_1,
+         FB_ratio_3m = fb_ratio_2,
+         FB_ratio_4m = fb_ratio_3,
+         FB_ratio_6y = fb_ratio_4,
+         FB_ratio_10y = fb_ratio_5,
+         SCFA_prod_1m = scfa_clr_1,
+         SCFA_prod_3m = scfa_clr_2 ,    
+         SCFA_prod_4m = scfa_clr_3 ,
+         SCFA_prod_6y = scfa_clr_4 ,
+         SCFA_prod_10y = scfa_clr_5) %>%
+  select(id, zBMI_1m, zBMI_3m ,zBMI_4m, zBMI_2y, zBMI_6y, zBMI_7y, zBMI_10y, zBMI_12y, FB_ratio_1m:FB_ratio_10y, SCFA_prod_1m:SCFA_prod_10y)%>%
+  mutate(FB_ratio_1m = ifelse(FB_ratio_1m == Inf, NA, FB_ratio_1m),
+         FB_ratio_3m = ifelse(FB_ratio_3m == Inf, NA, FB_ratio_3m),
+         FB_ratio_4m = ifelse(FB_ratio_4m == Inf, NA, FB_ratio_4m),
+         FB_ratio_6y = ifelse(FB_ratio_6y == Inf, NA, FB_ratio_6y),
+         FB_ratio_10y = ifelse(FB_ratio_10y == Inf, NA, FB_ratio_10y))
+
+
 # the following objects can be used for analyses or visualization
 save(
   df,
   df_clr, 
+  df_cor,
   otu_rf,
   df_rel,
   df_scfa_clr,
@@ -245,4 +288,3 @@ save(
   fb_clr,
   file = here::here("rdata/mb_import_H.Rds")
 )
-
